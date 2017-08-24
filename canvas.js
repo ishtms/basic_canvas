@@ -60,18 +60,21 @@ let Ball = function(_color, _radius, _x, _y, _speedX, _speedY){
 //Random Color generator for balls;
 
 let _randomColorGenerator = () => {
-    let _redHue = Math.floor(Math.random() * 255);
-    let _blueHue = Math.floor(Math.random() * 255);
-    let _greenHue = Math.floor(Math.random() * 255);
-
-    let _rgbaColor = 'rgba('+_redHue+','+_greenHue+','+_blueHue+',1)'
-    return _rgbaColor;
+    // let _redHue = Math.floor(Math.random() * 255);
+    // let _blueHue = Math.floor(Math.random() * 255);
+    // let _greenHue = Math.floor(Math.random() * 255);
+    // if(_redHue < 40 && _blueHue < 40 || _greenHue < 40){
+    //     return 'rgba(173,122,0,1)'
+    // }
+    // let _rgbaColor = 'rgba('+_redHue+','+_greenHue+','+_blueHue+',1)'
+    // return _rgbaColor;
+    return 'rgba(255,255,255,1)'
 }
 
 //Random Radius generator for balls;
 
 let _randomRadiusGenerator = () =>{
-    return Math.floor(Math.random()*4);
+    return Math.floor(Math.random()*3) + 1;
 }
 
 //Generate random numbers in range
@@ -84,9 +87,9 @@ let _randomRangeGenerator = (_max) => {
 
 let _randomSpeedGenerator = (number) => {
     if(number == 0){
-        return Math.random() - 0.5;
+        return (Math.random()*4) - 2.0;
     }else if(number == 1){
-        return Math.random() - 0.5;
+        return (Math.random()*4) - 2.0;
     }else{
         console.log("Sorry, only values 1 and 0 accepted for x and y speeds");
     }
@@ -105,7 +108,7 @@ let _randomCordinateGenerator = (number) => {
 
 let BallArray = [];
 
-for(let index = 0; index < 530; index++){
+for(let index = 0; index <125; index++){
     BallArray.push(new Ball(_randomColorGenerator(),
                             _randomRadiusGenerator(),
                             _randomCordinateGenerator(0),
@@ -118,11 +121,25 @@ for(let index = 0; index < 530; index++){
 //Function to draw all lines to connect each and every ball with mouse position
 
 let drawLines = () => {
+    for(let _outer = 0; _outer < BallArray.length; _outer++){
+        let _curr = BallArray[_outer];
+        for(let _inner = 0; _inner < BallArray.length; _inner++){
+            let _target = BallArray[_inner];
+            if(Math.abs(_curr.x - _target.x) <= 80 && Math.abs(_curr.y - _target.y) <= 80 ){
+                context.beginPath();
+                context.moveTo(_curr.x, _curr.y);
+                context.lineTo(_target.x, _target.y);
+                context.strokeStyle='white';
+                context.lineWidth=0.3;
+                context.stroke();
+            }
+        }
+    }
     if(cursorProps._xPos == null || cursorProps._yPos == null){
         return;
     }
         for(let innerIndex = 0; innerIndex < BallArray.length; innerIndex++){
-            if(Math.abs(cursorProps._xPos - BallArray[innerIndex].x) <= 80 && Math.abs(cursorProps._yPos - BallArray[innerIndex].y) <= 80){
+            if(Math.abs(cursorProps._xPos - BallArray[innerIndex].x) <= 200 && Math.abs(cursorProps._yPos - BallArray[innerIndex].y) <= 200){
                 context.beginPath();
                 context.moveTo(cursorProps._xPos, cursorProps._yPos);
                 context.lineTo(BallArray[innerIndex].x, BallArray[innerIndex].y);

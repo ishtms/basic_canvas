@@ -3,6 +3,6 @@ body,html{
     padding: 0px;
 }
 #game{
-    background: #000;
+    background: rgb(182, 25, 36);
     display: block;
 }
