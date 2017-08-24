@@ -1,37 +1,146 @@
-function Circle(x,y,radius){
-    this.x = x;
-    this.y = y;
-    this.radius = radius;
-}
-
-let untangleGame = {
-    circles: []
-}
-
-let drawCircle  = (context, x, y, radius) => {
-    context.fillStyle = 'rgba(200,200,100,0.9)';
-    context.beginPath();
-    context.arc(x, y, radius, 0, Math.PI * 2, true);
-    context.closePath();
-    context.fill();
-}
-
 let canvas = document.getElementById('game');
 let context = canvas.getContext('2d');
-
-//setting dynamic height and width of the canvas
 canvas.height = window.innerHeight;
 canvas.width = window.innerWidth;
 
-let circleRadius = 10;
-var circlesCount = 5;
+let canvasProps = {
+    height: canvas.clientHeight,
+    width: canvas.clientWidth
+}
+let cursorProps = {
+    _xPos : null,
+    _yPos : null
+}
+canvas.addEventListener('mousemove', function(event){
+    cursorProps._xPos = event.clientX;
+    cursorProps._yPos = event.clientY;
+})
 
-//generating random circles 'circlesCount' times 
-for(let index = 0; index < circlesCount; index++){
-    let x = Math.random() * canvas.width;
-    let y = Math.random() * canvas.height;
+let Ball = function(_color, _radius, _x, _y, _speedX, _speedY){
+    this.color = _color;
+    this.originalRadius = _radius;
+    this.radius = _radius;
+    this.x = _x;
+    this.y = _y;
+    this.speedX = _speedX;
+    this.speedY = _speedY;
 
-    drawCircle(context, x, y, circleRadius);
-    untangleGame.circles.push(new Circle(x,y,circleRadius));
+    this.update = function(_speedX, _speedY){
+        // if(cursorProps._xPos != null || cursorProps._yPos != null){
+        //     if(Math.abs(this.x - cursorProps._xPos) <=30  && Math.abs(this.y - cursorProps._yPos) <= 30){
+        //         if(this.radius < 30){
+        //             this.radius += 1;
+        //         }
+        //     }else{
+        //         if(this.radius > this.originalRadius){
+        //             this.radius = Math.abs(this.radius-1);
+        //         }
+        //     }
+        // }
+        if(this.x + this.radius >= canvasProps.width || this.x - this.radius <= 0){
+            this.speedX = -this.speedX
+        }
+        if(this.y + this.radius >= canvasProps.height || this.y - this.radius <= 0){
+            this.speedY = -this.speedY;
+        }
+
+        this.x = this.x + this.speedX;
+        this.y = this.y + this.speedY;
+        this.draw();
+    }
+    
+    this.draw = function(){
+        context.beginPath();
+        context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        context.fillStyle = this.color;
+        context.fill();
+    }
 }
 
+//Random Color generator for balls;
+
+let _randomColorGenerator = () => {
+    let _redHue = Math.floor(Math.random() * 255);
+    let _blueHue = Math.floor(Math.random() * 255);
+    let _greenHue = Math.floor(Math.random() * 255);
+
+    let _rgbaColor = 'rgba('+_redHue+','+_greenHue+','+_blueHue+',1)'
+    return _rgbaColor;
+}
+
+//Random Radius generator for balls;
+
+let _randomRadiusGenerator = () =>{
+    return Math.floor(Math.random()*4);
+}
+
+//Generate random numbers in range
+
+let _randomRangeGenerator = (_max) => {
+    return Math.random() * (_max - 65) + 35;
+}
+
+// Get random speed for balls 0 = dx, 1 = dy
+
+let _randomSpeedGenerator = (number) => {
+    if(number == 0){
+        return Math.random() - 0.5;
+    }else if(number == 1){
+        return Math.random() - 0.5;
+    }else{
+        console.log("Sorry, only values 1 and 0 accepted for x and y speeds");
+    }
+}
+
+//Random X & Y co-ordinate generator 0 = x, 1 = y
+let _randomCordinateGenerator = (number) => {
+    if(number == 0){
+        return _randomRangeGenerator(canvasProps.width)
+    }else if(number == 1){
+        return _randomRangeGenerator(canvasProps.height)
+    }else{
+        console.log("Sorry, only values 1 and 0 accepted for x and y co-ordinate");
+    }
+}
+
+let BallArray = [];
+
+for(let index = 0; index < 530; index++){
+    BallArray.push(new Ball(_randomColorGenerator(),
+                            _randomRadiusGenerator(),
+                            _randomCordinateGenerator(0),
+                            _randomCordinateGenerator(1),
+                            _randomSpeedGenerator(0),
+                            _randomSpeedGenerator(1)
+                        ));
+}
+
+//Function to draw all lines to connect each and every ball with mouse position
+
+let drawLines = () => {
+    if(cursorProps._xPos == null || cursorProps._yPos == null){
+        return;
+    }
+        for(let innerIndex = 0; innerIndex < BallArray.length; innerIndex++){
+            if(Math.abs(cursorProps._xPos - BallArray[innerIndex].x) <= 80 && Math.abs(cursorProps._yPos - BallArray[innerIndex].y) <= 80){
+                context.beginPath();
+                context.moveTo(cursorProps._xPos, cursorProps._yPos);
+                context.lineTo(BallArray[innerIndex].x, BallArray[innerIndex].y);
+                context.strokeStyle='white';
+                context.lineWidth=0.3;
+                context.stroke();
+            }
+        }
+}
+
+let animate = () => {
+    requestAnimationFrame(animate);
+    context.clearRect(0,0, canvas.clientWidth, canvas.clientHeight);
+
+    for(var index = 0; index < BallArray.length; index++){
+        BallArray[index].update();
+    }
+drawLines();
+
+}
+animate();
