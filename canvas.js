@@ -74,7 +74,7 @@ let _randomColorGenerator = () => {
 //Random Radius generator for balls;
 
 let _randomRadiusGenerator = () =>{
-    return Math.floor(Math.random()*3) + 1;
+    return 2;
 }
 
 //Generate random numbers in range
